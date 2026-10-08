@@ -1593,6 +1593,8 @@ f32_B_dst: f32_B5_b_0_2 is f32_B_3_5=5 & f32_B5_b_0_2                 { export f
 f32_B_dst: f32_B6_b_0_2 is f32_B_3_5=6 & f32_B6_b_0_2                 { export f32_B6_b_0_2; }
 f32_B_dst: f32_B7_b_0_2 is f32_B_3_5=7 & f32_B7_b_0_2                 { export f32_B7_b_0_2; }
 
+# register 63 = PCL (read-only): address of this instruction with bits [1:0] cleared
+f32_B_src: pcl          is f32_B_3_5=0b111 & f32_B7_b_0_2=0b111 & pcl { local tmp:4 = inst_start & 0xfffffffc; export tmp; }
 f32_B_src: limm         is f32_B_3_5=0b111 & f32_B7_b_0_2=0b110; limm { export *[const]:4 limm; }
 f32_B_src: f32_B0_b_0_2 is f32_B_3_5=0 & f32_B0_b_0_2                 { export f32_B0_b_0_2; }
 f32_B_src: f32_B1_b_0_2 is f32_B_3_5=1 & f32_B1_b_0_2                 { export f32_B1_b_0_2; }
@@ -1603,6 +1605,7 @@ f32_B_src: f32_B5_b_0_2 is f32_B_3_5=5 & f32_B5_b_0_2                 { export f
 f32_B_src: f32_B6_b_0_2 is f32_B_3_5=6 & f32_B6_b_0_2                 { export f32_B6_b_0_2; }
 f32_B_src: f32_B7_b_0_2 is f32_B_3_5=7 & f32_B7_b_0_2                 { export f32_B7_b_0_2; }
 
+f32_C_src: pcl      is f32_C=0b111111 & pcl { local tmp:4 = inst_start & 0xfffffffc; export tmp; }
 f32_C_src: limm     is f32_C=0b111110; limm { export *[const]:4 limm; }
 f32_C_src: f32_C    is f32_C                { export f32_C; }
 
@@ -1613,12 +1616,12 @@ f32_gen4_C_aa_zz_src: f32_C 	is f32_gen4_dop_aa=0b01 & f32_C          			{ expor
 f32_gen4_C_aa_zz_src: limm 	is f32_gen4_dop_aa=0b01 & f32_C=0b111110; limm  { export *[const]:4 limm;  }
 f32_gen4_C_aa_zz_src: f32_C 	is f32_gen4_dop_aa=0b10 & f32_C          			{ export f32_C;            }
 f32_gen4_C_aa_zz_src: limm 	is f32_gen4_dop_aa=0b10 & f32_C=0b111110; limm  { export *[const]:4 limm;  }
-f32_gen4_C_aa_zz_src: value 	is f32_gen4_dop_aa=0b11 & f32_gen4_dop_ZZ=0b00 & f32_C                    [ value=f32_C << 2;]    { export *[const]:4 value; }
-f32_gen4_C_aa_zz_src: limm 	is f32_gen4_dop_aa=0b11 & f32_gen4_dop_ZZ=0b00 & f32_C=0b111110; limm                               { export *[const]:4 limm; }
-f32_gen4_C_aa_zz_src: value 	is f32_gen4_dop_aa=0b11 & f32_gen4_dop_ZZ=0b10 & f32_C                    [ value=f32_C << 1;]    { export *[const]:4 value; }
-f32_gen4_C_aa_zz_src: limm 	is f32_gen4_dop_aa=0b11 & f32_gen4_dop_ZZ=0b10 & f32_C=0b111110; limm                               { export *[const]:4 limm; }
-f32_gen4_C_aa_zz_src: value 	is f32_gen4_dop_aa=0b11 & f32_gen4_dop_ZZ=0b11 & f32_C                    [ value=f32_C << 2;]    { export *[const]:4 value; }
-f32_gen4_C_aa_zz_src: limm 	is f32_gen4_dop_aa=0b11 & f32_gen4_dop_ZZ=0b11 & f32_C=0b111110; limm                               { export *[const]:4 limm; }
+f32_gen4_C_aa_zz_src: f32_C 	is f32_gen4_dop_aa=0b11 & f32_gen4_dop_ZZ=0b00 & f32_C                    { local v:4 = f32_C << 2; export v; }
+f32_gen4_C_aa_zz_src: limm 	is f32_gen4_dop_aa=0b11 & f32_gen4_dop_ZZ=0b00 & f32_C=0b111110; limm                               { local v:4 = limm << 2; export v; }
+f32_gen4_C_aa_zz_src: f32_C 	is f32_gen4_dop_aa=0b11 & f32_gen4_dop_ZZ=0b10 & f32_C                    { local v:4 = f32_C << 1; export v; }
+f32_gen4_C_aa_zz_src: limm 	is f32_gen4_dop_aa=0b11 & f32_gen4_dop_ZZ=0b10 & f32_C=0b111110; limm                               { local v:4 = limm << 1; export v; }
+f32_gen4_C_aa_zz_src: f32_C 	is f32_gen4_dop_aa=0b11 & f32_gen4_dop_ZZ=0b11 & f32_C                    { local v:4 = f32_C << 2; export v; }
+f32_gen4_C_aa_zz_src: limm 	is f32_gen4_dop_aa=0b11 & f32_gen4_dop_ZZ=0b11 & f32_C=0b111110; limm                               { local v:4 = limm << 2; export v; }
 
 
 
@@ -1636,16 +1639,19 @@ f32_A_B_dst: f32_B5_b_0_2 is (f32_bits_22_23=0b10 | f32_bits_22_23=0b11) & f32_B
 f32_A_B_dst: f32_B6_b_0_2 is (f32_bits_22_23=0b10 | f32_bits_22_23=0b11) & f32_B_3_5=6 & f32_B6_b_0_2                 				{ export f32_B6_b_0_2; }
 f32_A_B_dst: f32_B7_b_0_2 is (f32_bits_22_23=0b10 | f32_bits_22_23=0b11) & f32_B_3_5=7 & f32_B7_b_0_2                 				{ export f32_B7_b_0_2; }
 
+f32_C_U6_src: pcl      			is f32_C=0b111111 		& (f32_bits_22_23=0b00) & pcl { local tmp:4 = inst_start & 0xfffffffc; export tmp; }
 f32_C_U6_src: limm     			is f32_C=0b111110 		& (f32_bits_22_23=0b00); limm 	{ export *[const]:4 limm; }
 f32_C_U6_src: f32_C    			is f32_C 				& (f32_bits_22_23=0b00)         { export f32_C; }
 f32_C_U6_src: f32_gen4_dop_U6  	is f32_gen4_dop_U6 		& (f32_bits_22_23=0b01)       	{ export *[const]:4 f32_gen4_dop_U6; }
 
 
+f32_C_U6_S12_src: pcl      			is f32_C=0b111111 		& (f32_bits_22_23=0b00 | (f32_bits_22_23=0b11 & f32_bit5=0b0)) & pcl { local tmp:4 = inst_start & 0xfffffffc; export tmp; }
 f32_C_U6_S12_src: limm     			is f32_C=0b111110 		& (f32_bits_22_23=0b00 | (f32_bits_22_23=0b11 & f32_bit5=0b0)); limm 	{ export *[const]:4 limm; }
 f32_C_U6_S12_src: f32_C    			is f32_C 				& (f32_bits_22_23=0b00 | (f32_bits_22_23=0b11 & f32_bit5=0b0))          { export f32_C; }
 f32_C_U6_S12_src: f32_gen4_dop_U6  	is f32_gen4_dop_U6 		& (f32_bits_22_23=0b01 | (f32_bits_22_23=0b11 & f32_bit5=0b1))       	{ export *[const]:4 f32_gen4_dop_U6; }
 f32_C_U6_S12_src: value  			is f32_gen4_dop_S_6_11 	& f32_gen4_dop_S_5_0 & f32_bits_22_23=0b10            [ value = (f32_gen4_dop_S_6_11 << 6) + f32_gen4_dop_S_5_0;]                         { export *[const]:4 value; }
 
+f32_C_U6_S12_src_for_jump: pcl      			    is f32_C=0b111111 		  & (f32_bits_22_23=0b00 | (f32_bits_22_23=0b11 & f32_bit5=0b0)) & pcl { local tmp:4 = inst_start & 0xfffffffc; export tmp; }
 f32_C_U6_S12_src_for_jump: limm     			    is f32_C=0b111110 		  & (f32_bits_22_23=0b00 | (f32_bits_22_23=0b11 & f32_bit5=0b0)); limm 	                                                    { export *[const]:4 limm; }
 f32_C_U6_S12_src_for_jump: f32_C    			    is f32_C 				        & (f32_bits_22_23=0b00 | (f32_bits_22_23=0b11 & f32_bit5=0b0))                                                            { export f32_C; }
 f32_C_U6_S12_src_for_jump: f32_gen4_dop_U6  	is f32_gen4_dop_U6 		  & (f32_bits_22_23=0b01 | (f32_bits_22_23=0b11 & f32_bit5=0b1))       	                                                    { export *[ram]:4 f32_gen4_dop_U6; }
@@ -1866,18 +1872,18 @@ ld_f32_gen4_load: "h" is (f32_gen4_dop_aa=0b10 &  f32_A_dst & f32_gen4_dop_ZZ=0b
 
 set_rules: "eq" is (f32_gen4_dop_i=0b111000 & f32_A_B_dst) ... & f32_C_U6_S12_src & f32_B_src { f32_A_B_dst = zext(f32_C_U6_S12_src ==  f32_B_src);}
 set_rules: "ne" is (f32_gen4_dop_i=0b111001 & f32_A_B_dst) ... & f32_C_U6_S12_src & f32_B_src { f32_A_B_dst = zext(f32_C_U6_S12_src !=  f32_B_src);}
-set_rules: "lt" is (f32_gen4_dop_i=0b111010 & f32_A_B_dst) ... & f32_C_U6_S12_src & f32_B_src { f32_A_B_dst = zext(f32_C_U6_S12_src s<  f32_B_src);}
-set_rules: "ge" is (f32_gen4_dop_i=0b111011 & f32_A_B_dst) ... & f32_C_U6_S12_src & f32_B_src { f32_A_B_dst = zext(f32_C_U6_S12_src s>= f32_B_src);}
-set_rules: "lo" is (f32_gen4_dop_i=0b111100 & f32_A_B_dst) ... & f32_C_U6_S12_src & f32_B_src { f32_A_B_dst = zext(f32_C_U6_S12_src <   f32_B_src);}
-set_rules: "hs" is (f32_gen4_dop_i=0b111101 & f32_A_B_dst) ... & f32_C_U6_S12_src & f32_B_src { f32_A_B_dst = zext(f32_C_U6_S12_src >=  f32_B_src);}
-set_rules: "le" is (f32_gen4_dop_i=0b111110 & f32_A_B_dst) ... & f32_C_U6_S12_src & f32_B_src { f32_A_B_dst = zext(f32_C_U6_S12_src s<= f32_B_src);}
-set_rules: "gt" is (f32_gen4_dop_i=0b111111 & f32_A_B_dst) ... & f32_C_U6_S12_src & f32_B_src { f32_A_B_dst = zext(f32_C_U6_S12_src s>  f32_B_src);}
+set_rules: "lt" is (f32_gen4_dop_i=0b111010 & f32_A_B_dst) ... & f32_C_U6_S12_src & f32_B_src { f32_A_B_dst = zext(f32_B_src s< f32_C_U6_S12_src);}
+set_rules: "ge" is (f32_gen4_dop_i=0b111011 & f32_A_B_dst) ... & f32_C_U6_S12_src & f32_B_src { f32_A_B_dst = zext(f32_B_src s>= f32_C_U6_S12_src);}
+set_rules: "lo" is (f32_gen4_dop_i=0b111100 & f32_A_B_dst) ... & f32_C_U6_S12_src & f32_B_src { f32_A_B_dst = zext(f32_B_src < f32_C_U6_S12_src);}
+set_rules: "hs" is (f32_gen4_dop_i=0b111101 & f32_A_B_dst) ... & f32_C_U6_S12_src & f32_B_src { f32_A_B_dst = zext(f32_B_src >= f32_C_U6_S12_src);}
+set_rules: "le" is (f32_gen4_dop_i=0b111110 & f32_A_B_dst) ... & f32_C_U6_S12_src & f32_B_src { f32_A_B_dst = zext(f32_B_src s<= f32_C_U6_S12_src);}
+set_rules: "gt" is (f32_gen4_dop_i=0b111111 & f32_A_B_dst) ... & f32_C_U6_S12_src & f32_B_src { f32_A_B_dst = zext(f32_B_src s> f32_C_U6_S12_src);}
 
 set_rules_flags: ".f" is (f32_gen4_dop_i=0b111111) ... & f32_C_U6_S12_src & f32_B_src { 
 	Z = f32_C_U6_S12_src == f32_B_src;
 	N = (f32_B_src - f32_C_U6_S12_src) s< 0:4;
 	C = f32_B_src < f32_C_U6_S12_src;
-	V = scarry(f32_B_src, f32_C_U6_S12_src);
+	V = sborrow(f32_B_src, f32_C_U6_S12_src);
 }
 
 gen4_f32_A_B_dst_ZN: ""   is (f32_A_B_dst & f32_bit_F=0b0) {}
@@ -2391,7 +2397,7 @@ f16_op_hreg_S: "-0x1" is f16_op_hreg_u3=7 { export 0xffffffff:4; }
 }
 
 :btst_s f16_b, f16_sh_sub_bit_U             is F16_MAJOR_OPCODE=$(F16_SH_SUB_BIT) & f16_sh_sub_bit_i = 0b111 & f16_b & f16_sh_sub_bit_U { 
-  local alu = f16_b | (1:4 << f16_sh_sub_bit_U);
+  local alu = f16_b & (1:4 << f16_sh_sub_bit_U);
   UPDATE_FLAGS_ZN(alu);
 }
 
@@ -4622,7 +4628,12 @@ f32_gen4_and: "" is (f32_bit_F=0b1 & (((f32_bits_22_23=0b10 | f32_bits_22_23=0b1
 # SLEEP c    00100001001011110000CCCCCC111111
 # SLEEP <u6> 00100001011011110000uuuuuu111111
 :sleep f32_C_U6_src           is (F32_MAJOR_OPCODE=$(F32_GEN4) & f32_gen4_sop_i=0b111111 & f32_gen4_sop_bits_16_21=0b101111 & f32_B_3_5=0b000 & f32_B0_b_0_2=0b001 & f32_bit_F=0b0) ... & f32_C_U6_src {
-    
+    # if bit 4 of the operand is set: IE = 1 and E = bits[3:0] (QEMU target/arc arc_gen_sleep), then wait for an interrupt
+    local v:1 = f32_C_U6_src:1;
+    if ((v & 0x10) == 0) goto <done>;
+    IE = 1;
+    E = v & 0xf;
+    <done>
 }
 
 # --------------------------------------------- SR ---------------------------------------------

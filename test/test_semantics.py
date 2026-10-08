@@ -41,6 +41,8 @@ def h16(v):  # one 16-bit instruction (little endian)
 def w32(v):  # one 32-bit instruction: high halfword first, each halfword little endian
     return struct.pack("<HH", v >> 16, v & 0xFFFF)
 
+failures = 0
+
 class Machine:
     def __init__(self, code, base=0x1000):
         self.emu = PcodeEmulator(lang)
@@ -67,10 +69,16 @@ class Machine:
     def disasm(self, addr):
         return str(self.decoder.decodeInstruction(ram.getAddress(addr), self.t.getContext()))
     def step(self, n=1):
+        global failures
         for _ in range(n):
-            self.t.stepInstruction()
+            try:
+                self.t.stepInstruction()
+            except Exception as e:
+                failures += 1
+                print(f"  [FAIL] could not execute the instruction at {self.pc():#x}: {str(e).splitlines()[0][:120]}")
+                return False
+        return True
 
-failures = 0
 def check(name, got, want):
     global failures
     ok = got == want
@@ -145,6 +153,42 @@ m = Machine(w32(0x246F003F))
 listing(m, [0x1000])
 ins = m.decoder.decodeInstruction(ram.getAddress(0x1000), m.t.getContext())
 check("rtie has fall-through", bool(ins.getFlowType().hasFallthrough()), False)
+
+print("8. BTST_S b,u5 tests the bit (Z set when the bit is clear)")
+m = Machine(h16(0xB9E4))                       # btst_s r1,0x4
+listing(m, [0x1000])
+m.set("r1", 0x0F); m.set("Z", 0)
+m.step(1)
+check("btst_s r1,4 with r1=0x0f sets Z", m.reg("Z"), 1)
+
+print("9. Register 63 (PCL) as a source operand")
+m = Machine(h16(0x78E0) + w32(0x2740748A))     # nop_s ; add r10,pcl,0x12  (at 0x1002)
+listing(m, [0x1002])
+m.step(2)
+check("add r10,pcl,0x12 at 0x1002 gives (0x1002 & ~3) + 0x12", m.reg("r10"), 0x1012)
+
+print("10. SETcc a,b,c compares b with c")
+m = Machine(w32(0x213A0080))                   # setlt r0,r1,r2
+listing(m, [0x1000])
+m.set("r1", 1); m.set("r2", 2)
+m.step(1)
+check("setlt r0,r1,r2 with r1=1,r2=2", m.reg("r0"), 1)
+
+print("11. LD.AS a,[b,c] scales the value of register c")
+m = Machine(w32(0x21F00080))                   # ld.as r0,[r1,r2]
+listing(m, [0x1000])
+m.set("r1", 0x3000); m.set("r2", 3)
+m.write(0x3008, struct.pack("<I", 0x11111111)); m.write(0x300C, struct.pack("<I", 0x22222222))
+m.step(1)
+check("ld.as r0,[r1,r2] with r1=0x3000,r2=3 loads 0x300c", m.reg("r0"), 0x22222222)
+
+print("12. SLEEP c with c[4] set enables interrupts and sets E")
+m = Machine(w32(0x212F003F))                   # sleep r0
+listing(m, [0x1000])
+m.set("r0", 0x15); m.set("IE", 0); m.set("E", 0)
+m.step(1)
+check("sleep r0 (r0=0x15): IE", m.reg("IE"), 1)
+check("sleep r0 (r0=0x15): E", m.reg("E"), 5)
 
 print(f"\n{failures} check(s) failed")
 sys.exit(failures)
